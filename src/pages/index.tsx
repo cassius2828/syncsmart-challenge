@@ -15,8 +15,6 @@ export default function Home() {
     enabled: false,
   });
 
-
-
   const handlePullContactsFromAlpha = async () => {
     const result = await pullContactsQuery.refetch();
     console.log(
@@ -248,7 +246,8 @@ const Puller = styled("div")(({ theme }) => ({
 
 export function ContactsModal(props: Props) {
   const { window } = props;
-  const { contacts, handleFilterContacts,refIndexesToFilterOut } = useAppContext();
+  const { contacts, handleFilterContacts, refIndexesToFilterOut } =
+    useAppContext();
   const [open, setOpen] = React.useState(false);
   const { indexSetCount } = useAppContext();
   const toggleDrawer = (newOpen: boolean) => () => {
@@ -314,7 +313,9 @@ export function ContactsModal(props: Props) {
                 size="small"
                 color="error"
                 sx={{ marginLeft: "1rem" }}
-                onClick={()=> handleFilterContacts(refIndexesToFilterOut.current)}
+                onClick={() =>
+                  handleFilterContacts(refIndexesToFilterOut.current)
+                }
               >
                 remove selected contacts
               </Button>
@@ -413,7 +414,12 @@ const columns: GridColDef[] = [
 const paginationModel = { page: 0, pageSize: 25 };
 
 export function DataTable({ contacts }: { contacts: Contact[] }) {
-  const { removeIndexFromSet, addIndexToSet } = useAppContext();
+  const {
+    removeIndexFromSet,
+    addIndexToSet,
+    selectionModel,
+    setSelectionModel,
+  } = useAppContext();
   const rows = contacts.map((contact, idx) => {
     const { firstname, lastname, email, phone } = contact.properties;
     return {
@@ -438,6 +444,10 @@ export function DataTable({ contacts }: { contacts: Contact[] }) {
         initialState={{ pagination: { paginationModel } }}
         pageSizeOptions={[25, 100]}
         checkboxSelection
+        onRowSelectionModelChange={(newRowSelectionModel) => {
+          setSelectionModel(newRowSelectionModel);
+        }}
+        rowSelectionModel={selectionModel}
         onCellClick={(cell) => {
           handleSetInsertionAndDeletion(cell);
           console.log(cell);

@@ -1,3 +1,4 @@
+import { GridInputRowSelectionModel } from "@mui/x-data-grid";
 import { Dispatch, SetStateAction } from "react";
 
 export type Contact = {
@@ -18,4 +19,6 @@ export type AppContextType = {
   addIndexToSet: (cell: any, index: number) => void;
   removeIndexFromSet: (cell: any, index: number) => void;
   handleFilterContacts: () => void;
+  selectionModel: GridInputRowSelectionModel;
+  setSelectionModel: Dispatch<SetStateAction<GridInputRowSelectionModel>>;
 };

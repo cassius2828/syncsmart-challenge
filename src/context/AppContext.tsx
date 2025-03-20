@@ -1,3 +1,4 @@
+import { GridRowSelectionModel } from "@mui/x-data-grid";
 import { type Contact } from "coding-challenge/utils/types";
 import { createContext, useRef, useState } from "react";
 
@@ -7,7 +8,9 @@ export const AppProvider = ({ children }) => {
   const refIndexesToFilterOut = useRef(new Set());
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [numOfContacts, setNumOfContacts] = useState<number>(100);
-
+  const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>(
+    []
+  );
   const [indexSetCount, setIndexSetCount] = useState<number>(
     refIndexesToFilterOut.current.size
   );
@@ -29,19 +32,16 @@ export const AppProvider = ({ children }) => {
 
   const handleFilterContacts = (set: Set<number>) => {
     let arr = [];
-    for(const val of set){
-        arr.push(val)
+    for (const val of set) {
+      arr.push(val);
     }
 
-    const filteredContacts = contacts.filter((contact, idx) =>
-      !arr.includes(idx)
-    );
-    console.log(filteredContacts);
-    console.log(arr);
+    const filteredContacts = contacts.filter((_, idx) => !arr.includes(idx));
+
     setContacts(filteredContacts);
-    refIndexesToFilterOut.current = {}
-    setIndexSetCount(refIndexesToFilterOut.current.size)
-    console.log(refIndexesToFilterOut)
+    refIndexesToFilterOut.current = {};
+    setIndexSetCount(refIndexesToFilterOut.current.size);
+    setSelectionModel([]);
   };
   return (
     <AppContext.Provider
@@ -55,6 +55,8 @@ export const AppProvider = ({ children }) => {
         numOfContacts,
         setNumOfContacts,
         handleFilterContacts,
+        selectionModel,
+        setSelectionModel,
       }}
     >
       {children}
