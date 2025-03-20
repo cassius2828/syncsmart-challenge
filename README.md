@@ -26,8 +26,6 @@ Upon accomplishing the base requirements, I was excited to test myself by diving
 
 A user can choose how many contacts to send to the alpha portal. The default is 100, and that data is processed and run on the initial render of the site. To confirm the amount, users must click the “Set” button — a green check appears once confirmed.
 
-To maintain efficiency, contacts are not regenerated when lowering the count. Instead, I used a separate state variable synced to the desired contact count. While this value can change and be reconfirmed, the actual contact state remains unchanged until execution. Example: changing from 100 to 75 slices the contact list without regeneration. New faker contacts are only generated once per mutation.
-
 
 
 ## 🚫 Contact Removal Before Sending
