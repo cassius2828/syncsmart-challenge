@@ -4,12 +4,12 @@ import { Button, Container, Input, Modal, ModalRoot } from "@mui/material";
 import { faker } from "@faker-js/faker";
 import { api } from "coding-challenge/utils/api";
 import styles from "./index.module.css";
-import { useEffect, useState, SetStateAction } from "react";
+import { useEffect, useState } from "react";
 import type { Contact } from "coding-challenge/utils/types";
 
 export default function Home() {
-  const [numOfContacts, setNumOfContacts] = useState<number>(100);
-  const [contacts, setContacts] = useState<Contact[]>([]);
+  const { contacts, setContacts, numOfContacts, setNumOfContacts } =
+    useAppContext();
   const addContactsMutation = api.hubspot.addContacts.useMutation();
   const pullContactsQuery = api.hubspot.pullFromAlpha.useQuery(undefined, {
     enabled: false,
@@ -38,11 +38,13 @@ export default function Home() {
     return emptyContacts.map((_, idx) => {
       const firstname = faker.person.firstName();
       const lastname = faker.person.lastName();
+      const phone = faker.phone.number({ style: "international" });
       const obj = {
         properties: {
           firstname,
           lastname,
           email: `${firstname}.${lastname}@gmail.com`,
+          phone,
           id: idx + 1,
         },
       };
@@ -79,8 +81,6 @@ export default function Home() {
           <div className={styles.showcaseContainer}>
             <ActionBtnContainer
               setNewAmountOfContacts={setNewAmountOfContacts}
-              numOfContacts={numOfContacts}
-              setNumOfContacts={setNumOfContacts}
               handlePullContactsFromAlpha={handlePullContactsFromAlpha}
               isPending={addContactsMutation.isPending}
               handleAddContactsToAlpha={() => {
@@ -93,33 +93,29 @@ export default function Home() {
                 setContacts(fetchContactsFromFaker());
                 setNumOfContacts(100);
               }}
-              contacts={contacts}
             />
             <div style={{ marginTop: "4rem" }}>{/* <AuthShowcase /> */}</div>
           </div>
         </div>
-        <ContactsModal contacts={contacts} />
+        <ContactsModal />
       </main>
     </>
   );
 }
 
 export const ActionBtnContainer = ({
-  numOfContacts,
-  setNumOfContacts,
   setNewAmountOfContacts,
-  contacts,
+
   handleAddContactsToAlpha,
   handlePullContactsFromAlpha,
   isPending,
 }: {
-  numOfConacts: number;
-  setNumOfContacts: React.Dispatch<SetStateAction<number>>;
-  contacts: Contact[];
+  setNewAmountOfContacts: () => void;
   handleAddContactsToAlpha: () => void;
   handlePullContactsFromAlpha: () => Contact[];
   isPending: boolean;
 }) => {
+  const { numOfContacts, setNumOfContacts } = useAppContext();
   const [areContactsSet, setAreContactsSet] = useState<boolean>(false);
   const [success, setSuccess] = useState<string>("test");
   const [error, setError] = useState<string>("gfssa");
@@ -144,9 +140,7 @@ export const ActionBtnContainer = ({
             color="warning"
             size="small"
           >
-            {isPending
-              ? "Sending contacts to alpha..."
-              : "Generate Accounts in Alpha"}
+            {isPending ? "Handling Your Data..." : "Generate Accounts in Alpha"}
           </Button>
           <label className={styles.numberInputLabel}>
             select how many contacts you want to upload
@@ -170,7 +164,7 @@ export const ActionBtnContainer = ({
             onClick={handleSetContacts}
             variant="text"
             size="small"
-            sx={{ color: "white" }}
+            sx={{ color: "white", width: "100%" }}
           >
             {" "}
             set number of contacts
@@ -180,10 +174,12 @@ export const ActionBtnContainer = ({
           <Button
             onClick={handlePullContactsFromAlpha}
             variant="outlined"
-            sx={{ color: "white", borderColor: "white" }}
+            sx={{ color: "white", width: "100%", borderColor: "white" }}
             size="small"
           >
-            Pull From Alpha and Create in Beta
+            {isPending
+              ? "Handling Your Data..."
+              : " Pull From Alpha and Create in Beta"}
           </Button>
         </Container>
       </Container>
@@ -206,7 +202,6 @@ import { styled } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { grey } from "@mui/material/colors";
 import Box from "@mui/material/Box";
-import Skeleton from "@mui/material/Skeleton";
 import Typography from "@mui/material/Typography";
 import SwipeableDrawer from "@mui/material/SwipeableDrawer";
 
@@ -228,7 +223,7 @@ const Root = styled("div")(({ theme }) => ({
   }),
 }));
 
-const StyledBox = styled("div")(({ theme }) => ({
+export const StyledBox = styled("div")(({ theme }) => ({
   backgroundColor: "#fff",
   ...theme.applyStyles("dark", {
     backgroundColor: grey[800],
@@ -250,8 +245,10 @@ const Puller = styled("div")(({ theme }) => ({
 
 export function ContactsModal(props: Props) {
   const { window } = props;
+  const { contacts, handleFilterContacts, refIndexesToFilterOut } =
+    useAppContext();
   const [open, setOpen] = React.useState(false);
-
+  const { indexSetCount } = useAppContext();
   const toggleDrawer = (newOpen: boolean) => () => {
     setOpen(newOpen);
   };
@@ -277,7 +274,7 @@ export function ContactsModal(props: Props) {
         sx={{
           color: "white",
           outline: "solid 1px white",
-          backgroundColor: "orange",
+          backgroundColor: "#e36537",
         }}
         size="small"
         onClick={toggleDrawer(true)}
@@ -308,23 +305,24 @@ export function ContactsModal(props: Props) {
         >
           <Puller />
           <Typography sx={{ p: 2, color: "text.secondary" }}>
-            {props.contacts.length} contacts ready
+            {contacts?.length} contacts ready
+            {indexSetCount > 0 && (
+              <Button
+                variant="contained"
+                size="small"
+                color="error"
+                sx={{ marginLeft: "1rem" }}
+                onClick={() =>
+                  handleFilterContacts(refIndexesToFilterOut.current)
+                }
+              >
+                remove selected contacts
+              </Button>
+            )}
           </Typography>
         </StyledBox>
         <StyledBox sx={{ px: 2, pb: 2, height: "100%", overflow: "auto" }}>
-          {props.contacts.map((contact, idx) => {
-            const { firstname, lastname, email } = contact.properties;
-            return (
-              <Box
-                key={idx}
-                sx={{ my: 1, p: 1, border: "1px solid #ccc", borderRadius: 1 }}
-              >
-                <Typography variant="body1">
-                  {firstname} {lastname} - {email} : {idx + 1}
-                </Typography>
-              </Box>
-            );
-          })}
+          <DataTable contacts={contacts} />
         </StyledBox>
       </SwipeableDrawer>
     </Root>
@@ -384,3 +382,78 @@ export const StatusModal = ({ success, setSuccess, error, setError }) => {
     </Modal>
   );
 };
+
+import { DataGrid, type GridColDef } from "@mui/x-data-grid";
+import Paper from "@mui/material/Paper";
+import { useAppContext } from "coding-challenge/context/useAppContext";
+
+const columns: GridColDef[] = [
+  { field: "id", headerName: "ID", width: 70 },
+  { field: "firstname", headerName: "First name", width: 150 },
+  { field: "lastname", headerName: "Last name", width: 150 },
+  {
+    field: "phone",
+    headerName: "phone",
+    type: "string",
+    width: 150,
+  },
+];
+
+// const rows = [
+//   { id: 1, lastname: "Snow", firstname: "Jon", phone: "+14486989603" },
+//   { id: 1, lastname: "Snow", firstname: "Jon", phone: "+14486989603" },
+//   { id: 1, lastname: "Snow", firstname: "Jon", phone: "+14486989603" },
+//   { id: 1, lastname: "Snow", firstname: "Jon", phone: "+14486989603" },
+//   { id: 1, lastname: "Snow", firstname: "Jon", phone: "+14486989603" },
+//   { id: 1, lastname: "Snow", firstname: "Jon", phone: "+14486989603" },
+//   { id: 1, lastname: "Snow", firstname: "Jon", phone: "+14486989603" },
+
+// ];
+
+const paginationModel = { page: 0, pageSize: 25 };
+
+export function DataTable({ contacts }: { contacts: Contact[] }) {
+  const {
+    removeIndexFromSet,
+    addIndexToSet,
+    selectionModel,
+    setSelectionModel,
+  } = useAppContext();
+  const rows = contacts.map((contact, idx) => {
+    const { firstname, lastname, email, phone } = contact.properties;
+    return {
+      id: idx + 1,
+      firstname,
+      lastname,
+      email,
+      phone,
+    };
+  });
+
+  const handleSetInsertionAndDeletion = (cell) => {
+    addIndexToSet(cell, cell.id - 1);
+    removeIndexFromSet(cell, cell.id - 1);
+  };
+
+  return (
+    <Paper sx={{ height: 400, width: "100%" }}>
+      <DataGrid
+      className="disable-select-all"
+        rows={rows}
+        columns={columns}
+        initialState={{ pagination: { paginationModel } }}
+        pageSizeOptions={[25, 100]}
+        checkboxSelection
+        onRowSelectionModelChange={(newRowSelectionModel) => {
+          setSelectionModel(newRowSelectionModel);
+        }}
+        rowSelectionModel={selectionModel}
+        onCellClick={(cell) => {
+          handleSetInsertionAndDeletion(cell);
+          console.log(cell);
+        }}
+        sx={{ border: 0 }}
+      />
+    </Paper>
+  );
+}

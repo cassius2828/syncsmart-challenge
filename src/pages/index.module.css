@@ -54,10 +54,14 @@
   letter-spacing: -0.025em;
   margin: 0;
   color: white;
+  text-align: center;
+  max-width: 70rem;
+  line-height: 4rem;
 }
 
 @media (min-width: 640px) {
   .title {
+    line-height: 6rem;
     font-size: 5rem;
   }
 }
@@ -181,6 +185,12 @@
   height: 3rem;
   gap: 2rem;
 }
+@media (max-width: 768px) {
+  .actionBtnContainer {
+    flex-direction: column-reverse;
+    margin-top: 11rem;
+  }
+}
 
 .numberInputLabel {
   margin: 4px;
@@ -191,10 +201,4 @@
   position: absolute;
   left: 2.25rem;
   top: 14px;
-}
-
-@media (max-width: 768px) {
-  .actionBtnContainer {
-    flex-direction: column;
-  }
 }

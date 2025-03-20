@@ -6,6 +6,8 @@ import { type AppType } from "next/app";
 import { api } from "coding-challenge/utils/api";
 
 import "coding-challenge/styles/globals.css";
+import { AppProvider } from "coding-challenge/context/AppContext";
+import Navbar from "coding-challenge/components/Navbar";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
@@ -13,9 +15,12 @@ const MyApp: AppType<{ session: Session | null }> = ({
 }) => {
   return (
     <SessionProvider session={session}>
-      <div className={GeistSans.className}>
-        <Component {...pageProps} />
-      </div>
+      <AppProvider>
+        <div className={GeistSans.className}>
+          <Navbar/>
+          <Component {...pageProps} />
+        </div>
+      </AppProvider>
     </SessionProvider>
   );
 };
