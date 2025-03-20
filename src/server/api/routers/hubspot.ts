@@ -102,7 +102,7 @@ async function fallBackCreateContactPosts({
     try {
       await axios.post(singleContactCreateURL, singleBody, options);
       successes.push(contact);
-    } catch (err) {
+    } catch (err: any) {
       console.error(
         `Failed to add contact. First Name: ${firstname} \n Last Name: ${lastname} \n Email: ${email}`
       );
@@ -197,7 +197,7 @@ async function pullFromAlphaServiceFn(accountType: string) {
       message: `Successfully fetched ${res.data?.results.length} contacts from Portal Alpha.`,
       hubspotResponse: res.data,
     };
-  } catch (err) {
+  } catch (err: any) {
     console.error("Error: Unable to fetch contacts from alpha.", err);
     return {
       success: false,
