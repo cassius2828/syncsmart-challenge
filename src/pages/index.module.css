@@ -195,6 +195,7 @@
 
 @media (max-width: 768px) {
   .actionBtnContainer {
-    flex-direction: column;
+    flex-direction: column-reverse;
+    margin-top: 11rem;
   }
 }

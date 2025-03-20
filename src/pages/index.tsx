@@ -170,7 +170,7 @@ export const ActionBtnContainer = ({
             onClick={handleSetContacts}
             variant="text"
             size="small"
-            sx={{ color: "white" }}
+            sx={{ color: "white", width: "100%" }}
           >
             {" "}
             set number of contacts
@@ -180,7 +180,7 @@ export const ActionBtnContainer = ({
           <Button
             onClick={handlePullContactsFromAlpha}
             variant="outlined"
-            sx={{ color: "white", borderColor: "white" }}
+            sx={{ color: "white", width: "100%", borderColor: "white" }}
             size="small"
           >
             Pull From Alpha and Create in Beta
