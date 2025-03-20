@@ -1,12 +1,38 @@
 import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
 import { Button, Container } from "@mui/material";
-
+import { faker } from "@faker-js/faker";
 import { api } from "coding-challenge/utils/api";
 import styles from "./index.module.css";
+import { useEffect, useState } from "react";
+import { Contact } from "coding-challenge/utils/types";
 
 export default function Home() {
   // const hello = api.post.hello.useQuery({ text: "from tRPC" });
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const addContactsToAlpha = () => {
+    console.log("test");
+  };
+  const fetchContactsFromFaker = () => {
+    const emptyContacts = Array.from({ length: 100 });
+    return () => {
+      return emptyContacts.map((_, idx) => {
+        const firstName = faker.person.firstName();
+        const lastName = faker.person.lastName();
+        const obj = {
+          firstName,
+          lastName,
+          email: `${firstName}.${lastName}@gmail.com`,
+          id: idx + 1,
+        };
+        return obj;
+      });
+    };
+  };
+  useEffect(() => {
+    const addContactsToState = fetchContactsFromFaker();
+    if (!contacts[43]) setContacts(addContactsToState());
+  }, []);
 
   return (
     <>
@@ -22,7 +48,7 @@ export default function Home() {
           </h1>
 
           <div className={styles.showcaseContainer}>
-            <ActionBtnContainer />
+            <ActionBtnContainer handleAddContactsToAlpha={addContactsToAlpha} />
             <AuthShowcase />
           </div>
         </div>
@@ -55,11 +81,16 @@ function AuthShowcase() {
   );
 }
 
-export const ActionBtnContainer = () => {
+export const ActionBtnContainer = ({
+  handleAddContactsToAlpha,
+}: {
+  handleAddContactsToAlpha: () => void;
+}) => {
   return (
     <>
       <Container className={styles.actionBtnContainer}>
         <Button
+          onClick={handleAddContactsToAlpha}
           variant="contained"
           className="md-rounded-1 bg-black"
           color="secondary"
