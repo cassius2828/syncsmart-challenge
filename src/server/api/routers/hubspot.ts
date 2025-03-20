@@ -10,7 +10,7 @@ import { type Contact } from "coding-challenge/utils/types";
 // * Batch = 1 call, all data in or none in
 // * Single = allows succeeding data to prevail and failed to stay out, also allows for optional fields to be included
 const batchContactsCreateURL = `https://api.hubapi.com/crm/v3/objects/contacts/batch/create`;
-const readObjectContactsURL = `https://api.hubapi.com/crm/v3/objects/contacts?properties=phone&properties=firstname&properties=lastname&properties=email`;
+const readObjectContactsURL = `https://api.hubapi.com/crm/v3/objects/contacts?limit=100&properties=phone&properties=firstname&properties=lastname&properties=email`;
 
 const contactInputSchema = z.array(
   z.object({
@@ -89,10 +89,10 @@ export const hubspotRouter = createTRPCRouter({
         },
       };
       const res = await axios.get(readObjectContactsURL, options);
-
+console.log(res, ' <-- res obj pull')
       return {
         success: true,
-        message: `Successfully fetched ${res.data?.length} contacts from Portal Alpha.`,
+        message: `Successfully fetched ${res.data?.results.length} contacts from Portal Alpha.`,
         hubspotResponse: res.data,
       };
     } catch (err) {

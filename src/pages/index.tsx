@@ -4,16 +4,23 @@ import { Button, Container, Input, Modal, ModalRoot } from "@mui/material";
 import { faker } from "@faker-js/faker";
 import { api } from "coding-challenge/utils/api";
 import styles from "./index.module.css";
-import { useEffect, useState, SetStateAction } from "react";
+import { useEffect, useState } from "react";
 import type { Contact } from "coding-challenge/utils/types";
 
 export default function Home() {
-  const [numOfContacts, setNumOfContacts] = useState<number>(100);
-  const [contacts, setContacts] = useState<Contact[]>([]);
+  const { contacts, setContacts, numOfContacts, setNumOfContacts } =
+    useAppContext();
   const addContactsMutation = api.hubspot.addContacts.useMutation();
   const pullContactsQuery = api.hubspot.pullFromAlpha.useQuery(undefined, {
     enabled: false,
   });
+
+  // const handleFilterContacts = (arr) => {
+  //   const filteredContacts = contacts.filter((contact, idx) =>
+  //     arr.includes(idx)
+  //   );
+  //   setContacts(filteredContacts);
+  // };
 
   const handlePullContactsFromAlpha = async () => {
     const result = await pullContactsQuery.refetch();
@@ -81,8 +88,6 @@ export default function Home() {
           <div className={styles.showcaseContainer}>
             <ActionBtnContainer
               setNewAmountOfContacts={setNewAmountOfContacts}
-              numOfContacts={numOfContacts}
-              setNumOfContacts={setNumOfContacts}
               handlePullContactsFromAlpha={handlePullContactsFromAlpha}
               isPending={addContactsMutation.isPending}
               handleAddContactsToAlpha={() => {
@@ -95,33 +100,29 @@ export default function Home() {
                 setContacts(fetchContactsFromFaker());
                 setNumOfContacts(100);
               }}
-              contacts={contacts}
             />
             <div style={{ marginTop: "4rem" }}>{/* <AuthShowcase /> */}</div>
           </div>
         </div>
-        <ContactsModal contacts={contacts} />
+        <ContactsModal />
       </main>
     </>
   );
 }
 
 export const ActionBtnContainer = ({
-  numOfContacts,
-  setNumOfContacts,
   setNewAmountOfContacts,
-  contacts,
+
   handleAddContactsToAlpha,
   handlePullContactsFromAlpha,
   isPending,
 }: {
-  numOfConacts: number;
-  setNumOfContacts: React.Dispatch<SetStateAction<number>>;
-  contacts: Contact[];
+  setNewAmountOfContacts: () => void;
   handleAddContactsToAlpha: () => void;
   handlePullContactsFromAlpha: () => Contact[];
   isPending: boolean;
 }) => {
+  const { numOfContacts, setNumOfContacts } = useAppContext();
   const [areContactsSet, setAreContactsSet] = useState<boolean>(false);
   const [success, setSuccess] = useState<string>("test");
   const [error, setError] = useState<string>("gfssa");
@@ -252,6 +253,7 @@ const Puller = styled("div")(({ theme }) => ({
 
 export function ContactsModal(props: Props) {
   const { window } = props;
+  const { contacts } = useAppContext();
   const [open, setOpen] = React.useState(false);
   const { indexSetCount } = useAppContext();
   const toggleDrawer = (newOpen: boolean) => () => {
@@ -310,7 +312,7 @@ export function ContactsModal(props: Props) {
         >
           <Puller />
           <Typography sx={{ p: 2, color: "text.secondary" }}>
-            {props.contacts.length} contacts ready
+            {contacts?.length} contacts ready
             {indexSetCount > 0 && (
               <Button
                 variant="contained"
@@ -324,7 +326,7 @@ export function ContactsModal(props: Props) {
           </Typography>
         </StyledBox>
         <StyledBox sx={{ px: 2, pb: 2, height: "100%", overflow: "auto" }}>
-          <DataTable contacts={props.contacts} />
+          <DataTable contacts={contacts} />
         </StyledBox>
       </SwipeableDrawer>
     </Root>
