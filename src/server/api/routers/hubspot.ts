@@ -35,93 +35,25 @@ export const hubspotRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       const contacts: Contact[] = input.contacts;
 
-      const batchBody = {
-        inputs: contacts.map((contact) => {
-          const { firstname, lastname, email, phone } = contact.properties;
-          return {
-            properties: {
-              firstname,
-              lastname,
-              phone,
-              email,
-            },
-          };
-        }),
-      };
-
-      try {
-        const token =
-          input.accountType === "alpha"
-            ? process.env.NEXT_PUBLIC_ALPHA_HUBSPOT_API_TOKEN
-            : process.env.NEXT_PUBLIC_BETA_HUBSPOT_API_TOKEN;
-
-        const options = {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        };
-
-        const res = await axios.post(
-          batchContactsCreateURL,
-          batchBody,
-          options
-        );
-
-        console.log("HubSpot Batch Response:", res.data);
-        if (res.data?.result?.data?.error?.category === "CONFLICT") {
-          // 🛑 Batch failed — handle fallback
-          throw new Error("BATCH_CONFLICT");
-        }
-        return {
-          success: true,
-          message: `Successfully added ${contacts.length} contacts.`,
-          hubspotResponse: res.data,
-        };
-      } catch (err: any) {
-        return await fallBackCreateContactPosts({
-          contacts,
-          accountType: input.accountType,
-          err,
-        });
-
-        console.error(
-          "Batch create failed:",
-          err.response?.data || err.message
-        );
-        return {
-          success: false,
-          message: "Failed to batch add contacts.",
-          error: err.response?.data || err.message,
-        };
-      }
+      // initial approach -- batch all contact creation post
+      return await batchCreateContactsPost({
+        contacts,
+        accountType: input.accountType,
+        err,
+      });
     }),
+
   // PULL FROM ALPHA PORTAL
   pullFromAlpha: publicProcedure.query(async () => {
-    try {
-      const options = {
-        headers: {
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_ALPHA_HUBSPOT_API_TOKEN}`,
-        },
-      };
-      const res = await axios.get(readObjectContactsURL, options);
-      console.log(res, " <-- res obj pull");
-      return {
-        success: true,
-        message: `Successfully fetched ${res.data?.results.length} contacts from Portal Alpha.`,
-        hubspotResponse: res.data,
-      };
-    } catch (err) {
-      console.error("Error: Unable to fetch contacts from alpha.", err);
-      return {
-        success: false,
-        message: "Unable to fetch contacts from alpha",
-        error: err.response?.data || err.message,
-      };
-    }
+    return await pullFromAlphaServiceFn();
   }),
 });
 
+///////////////////////////
+// * Service Functions
+///////////////////////////
+
+// fallback single create contact post
 async function fallBackCreateContactPosts({
   contacts,
   accountType,
@@ -183,4 +115,85 @@ async function fallBackCreateContactPosts({
       failures,
     },
   };
+}
+
+// batch create contacts post
+async function batchCreateContactsPost({
+  contacts,
+  accountType,
+}: {
+  contacts: Contact[];
+  accountType: string;
+}) {
+  const batchBody = {
+    inputs: contacts.map((contact) => {
+      const { firstname, lastname, email, phone } = contact.properties;
+      return {
+        properties: {
+          firstname,
+          lastname,
+          phone,
+          email,
+        },
+      };
+    }),
+  };
+
+  try {
+    const token =
+      accountType === "alpha"
+        ? process.env.NEXT_PUBLIC_ALPHA_HUBSPOT_API_TOKEN
+        : process.env.NEXT_PUBLIC_BETA_HUBSPOT_API_TOKEN;
+
+    const options = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    };
+
+    const res = await axios.post(batchContactsCreateURL, batchBody, options);
+
+    console.log("HubSpot Batch Response:", res.data);
+    if (res.data?.result?.data?.error?.category === "CONFLICT") {
+      // 🛑 Batch failed — handle fallback
+      throw new Error("BATCH_CONFLICT");
+    }
+    return {
+      success: true,
+      message: `Successfully added ${contacts.length} contacts.`,
+      hubspotResponse: res.data,
+    };
+  } catch (err: any) {
+    return await fallBackCreateContactPosts({
+      contacts,
+      accountType: input.accountType,
+      err,
+    });
+  }
+}
+
+// fetch contacts from alpha portal
+async function pullFromAlphaServiceFn() {
+  try {
+    const options = {
+      headers: {
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_ALPHA_HUBSPOT_API_TOKEN}`,
+      },
+    };
+    const res = await axios.get(readObjectContactsURL, options);
+    console.log(res, " <-- res obj pull");
+    return {
+      success: true,
+      message: `Successfully fetched ${res.data?.results.length} contacts from Portal Alpha.`,
+      hubspotResponse: res.data,
+    };
+  } catch (err) {
+    console.error("Error: Unable to fetch contacts from alpha.", err);
+    return {
+      success: false,
+      message: "Unable to fetch contacts from alpha",
+      error: err.response?.data || err.message,
+    };
+  }
 }
