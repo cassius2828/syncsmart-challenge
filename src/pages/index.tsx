@@ -5,7 +5,9 @@ import { faker } from "@faker-js/faker";
 import { api } from "coding-challenge/utils/api";
 import styles from "./index.module.css";
 import { useEffect, useState } from "react";
-import { Contact } from "coding-challenge/utils/types";
+import type { Contact } from "coding-challenge/utils/types";
+import axios from 'axios'
+import { handleDownload } from "coding-challenge/utils/utils";
 
 export default function Home() {
   // const hello = api.post.hello.useQuery({ text: "from tRPC" });
@@ -86,6 +88,7 @@ export const ActionBtnContainer = ({
 }: {
   handleAddContactsToAlpha: () => void;
 }) => {
+  handleDownload
   return (
     <>
       <Container className={styles.actionBtnContainer}>
