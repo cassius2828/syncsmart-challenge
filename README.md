@@ -53,7 +53,9 @@ When a batch POST fails, I catch specific errors (BATCH_ERROR, CONFLICT) and fal
 
 There are two dashboards synced with the actual HubSpot test portals. Users can verify contact mutations without leaving the app. The dashboards render a table of contacts using a query function that requires a refetch() to trigger — ensuring it only runs when needed (e.g., on page visit). One optimization would be moving this state to context to avoid redundant fetches.
 
+## Portal Limitations
 
+Hubspot only allows us to batch 100 contacts at a time, so when we display the contacts in our dashboards, we are only seeing 100 of the items at a time. If we wanted to show all of the contacts in the portal, we would need to find a way to select certain contacts out of the available in the hubspot portal and then spread those in to our state over the course of multiple calls to get all contacts. If would also be quite slow in this implementation since the batches would fail due to duplicate contacts and the fallback method of single post mutations would kick in. 
 
 ## ✅ Summary
 
