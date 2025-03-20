@@ -4,7 +4,7 @@ import axios from "axios";
 import { type Contact } from "coding-challenge/utils/types";
 
 // batching causes an issue when some of the data has already been transferred
-// may be better to either do iterate and do every one, or have a fall back of iteration, or 
+// may be better to either do iterate and do every one, or have a fall back of iteration, or
 // lastly try removing ids that fail and try again
 const batchContactsCreateURL = `https://api.hubapi.com/crm/v3/objects/contacts/batch/create`;
 const readObjectContactsURL = `https://api.hubapi.com/crm/v3/objects/contacts`;
@@ -14,6 +14,7 @@ const contactInputSchema = z.array(
     properties: z.object({
       firstname: z.string(),
       lastname: z.string(),
+      phone: z.string(),
       email: z.string().email(),
     }),
   })
@@ -32,11 +33,13 @@ export const hubspotRouter = createTRPCRouter({
 
       const batchBody = {
         inputs: contacts.map((contact) => {
-          const { firstname, lastname, email } = contact.properties;
+          const { firstname, lastname, email, phone } =
+            contact.properties;
           return {
             properties: {
               firstname,
               lastname,
+              phone,
               email,
             },
           };
