@@ -1,19 +1,21 @@
-import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
-import { Button, Container, Input, Modal, ModalRoot } from "@mui/material";
+import { Button, Container, Input } from "@mui/material";
 import { faker } from "@faker-js/faker";
 import { api } from "coding-challenge/utils/api";
 import styles from "./index.module.css";
 import { useEffect, useState } from "react";
 import type { Contact } from "coding-challenge/utils/types";
-
+import type { GridCellParams } from "@mui/x-data-grid";
 export default function Home() {
   const { contacts, setContacts, numOfContacts, setNumOfContacts } =
     useAppContext();
   const addContactsMutation = api.hubspot.addContacts.useMutation();
-  const pullContactsQuery = api.hubspot.pullFromAlpha.useQuery(undefined, {
-    enabled: false,
-  });
+  const pullContactsQuery = api.hubspot.pullFromAlpha.useQuery(
+    { accountType: "alpha" },
+    {
+      enabled: false,
+    }
+  );
 
   const handlePullContactsFromAlpha = async () => {
     const result = await pullContactsQuery.refetch();
@@ -112,7 +114,7 @@ export const ActionBtnContainer = ({
 }: {
   setNewAmountOfContacts: () => void;
   handleAddContactsToAlpha: () => void;
-  handlePullContactsFromAlpha: () => Contact[];
+  handlePullContactsFromAlpha: () => void;
   isPending: boolean;
 }) => {
   const { numOfContacts, setNumOfContacts } = useAppContext();
@@ -137,7 +139,7 @@ export const ActionBtnContainer = ({
             }}
             variant="contained"
             className="md-rounded-1"
-            color="warning"
+            sx={{ color: "#fff", backgroundColor: "#e36537" }}
             size="small"
           >
             {isPending ? "Handling Your Data..." : "Generate Accounts in Alpha"}
@@ -150,7 +152,7 @@ export const ActionBtnContainer = ({
               type="number"
               inputProps={{ max: 100, min: 1 }}
               onChange={(e) => {
-                setNumOfContacts(e.target.value);
+                setNumOfContacts(Number(e.target.value));
                 if (areContactsSet) setAreContactsSet(false);
               }}
               value={numOfContacts}
@@ -183,14 +185,14 @@ export const ActionBtnContainer = ({
           </Button>
         </Container>
       </Container>
-      {(success || error) && (
+      {/* {(success || error) && (
         <StatusModal
           setSuccess={setSuccess}
           error={error}
           setError={setError}
           success={success}
         />
-      )}
+      )} */}
     </>
   );
 };
@@ -201,7 +203,6 @@ import { Global } from "@emotion/react";
 import { styled } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { grey } from "@mui/material/colors";
-import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import SwipeableDrawer from "@mui/material/SwipeableDrawer";
 
@@ -329,59 +330,35 @@ export function ContactsModal(props: Props) {
   );
 }
 
-function AuthShowcase() {
-  const { data: sessionData } = useSession();
-
-  const { data: secretMessage } = api.post.getSecretMessage.useQuery(
-    undefined, // no input
-    { enabled: sessionData?.user !== undefined }
-  );
-
-  return (
-    <div className={styles.authContainer}>
-      <p className={styles.showcaseText}>
-        {sessionData && <span>Logged in as {sessionData.user?.name}</span>}
-        {secretMessage && <span> - {secretMessage}</span>}
-      </p>
-      <button
-        className={styles.loginButton}
-        onClick={sessionData ? () => void signOut() : () => void signIn()}
-      >
-        {sessionData ? "Sign out" : "Sign in"}
-      </button>
-    </div>
-  );
-}
-
-export const StatusModal = ({ success, setSuccess, error, setError }) => {
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     setSuccess("");
-  //     setError("");
-  //   }, 3000);
-  // }, []);
-  const title = success ? "Success!" : error ? "Error" : "";
-  const message = success || error;
-  return (
-    <Modal
-      onClose={() => {
-        setSuccess("");
-        setError("");
-      }}
-      aria-labelledby="modal-modal-title"
-      aria-describedby="modal-modal-description"
-    >
-      <Box>
-        <Typography id="modal-modal-title" variant="h6" component="h2">
-          {title}
-        </Typography>
-        <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-          {message}
-        </Typography>
-      </Box>
-    </Modal>
-  );
-};
+// export const StatusModal = ({ success, setSuccess, error, setError }) => {
+//   // useEffect(() => {
+//   //   setTimeout(() => {
+//   //     setSuccess("");
+//   //     setError("");
+//   //   }, 3000);
+//   // }, []);
+//   const title = success ? "Success!" : error ? "Error" : "";
+//   const message = success || error;
+//   return (
+//     <Modal
+//       onClose={() => {
+//         setSuccess("");
+//         setError("");
+//       }}
+//       aria-labelledby="modal-modal-title"
+//       aria-describedby="modal-modal-description"
+//     >
+//       <Box>
+//         <Typography id="modal-modal-title" variant="h6" component="h2">
+//           {title}
+//         </Typography>
+//         <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+//           {message}
+//         </Typography>
+//       </Box>
+//     </Modal>
+//   );
+// };
 
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import Paper from "@mui/material/Paper";
@@ -430,15 +407,15 @@ export function DataTable({ contacts }: { contacts: Contact[] }) {
     };
   });
 
-  const handleSetInsertionAndDeletion = (cell) => {
-    addIndexToSet(cell, cell.id - 1);
-    removeIndexFromSet(cell, cell.id - 1);
+  const handleSetInsertionAndDeletion = (cell: GridCellParams) => {
+    addIndexToSet(cell, Number(cell.id) - 1);
+    removeIndexFromSet(cell, Number(cell.id) - 1);
   };
 
   return (
     <Paper sx={{ height: 400, width: "100%" }}>
       <DataGrid
-      className="disable-select-all"
+        className="disable-select-all"
         rows={rows}
         columns={columns}
         initialState={{ pagination: { paginationModel } }}

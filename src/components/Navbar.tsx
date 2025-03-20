@@ -2,10 +2,8 @@ import * as React from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
-import MenuIcon from "@mui/icons-material/Menu";
 import Link from "next/link";
 import { Container } from "@mui/material";
 
@@ -32,10 +30,11 @@ export default function Navbar() {
           >
             <Link href={"/"}>
               <Button
-                color=""
+                color="inherit"
                 variant="contained"
                 sx={{
                   color: "#e36537",
+                  backgroundColor: "#fff",
                   fontSize: { xs: "0.75rem", sm: "1rem" },
                   px: { xs: "4px", sm: ".75rem" },
                   width: { xs: "9rem", md: "14rem" },
@@ -46,10 +45,11 @@ export default function Navbar() {
             </Link>
             <Link href={"/dashboard/alpha"}>
               <Button
-                color=""
+                color="inherit"
                 variant="contained"
                 sx={{
                   color: "#e36537",
+                  backgroundColor: "#fff",
                   fontSize: { xs: "0.75rem", sm: "1rem" },
                   px: { xs: "4px", sm: ".75rem" },
                   width: { xs: "9rem", md: "14rem" },
@@ -60,10 +60,11 @@ export default function Navbar() {
             </Link>
             <Link href={"/dashboard/beta"}>
               <Button
-                color=""
+                color="inherit"
                 variant="contained"
                 sx={{
                   color: "#e36537",
+                  backgroundColor: "#fff",
                   fontSize: { xs: "0.75rem", sm: "1rem" },
                   px: { xs: "4px", sm: ".75rem" },
                   width: { xs: "9rem", md: "14rem" },

@@ -2,7 +2,14 @@ import { useEffect, useState } from "react";
 import { DataTable } from "..";
 import { type Contact } from "coding-challenge/utils/types";
 import { api } from "coding-challenge/utils/api";
-import { Box, Container, Divider, Paper, Skeleton, Typography } from "@mui/material";
+import {
+  Box,
+  Container,
+  Divider,
+  Paper,
+  Skeleton,
+  Typography,
+} from "@mui/material";
 const Beta = () => {
   const [betaContacts, setBetaContacts] = useState<Contact[]>([]);
   const pullContactsQuery = api.hubspot.pullFromAlpha.useQuery(
@@ -40,9 +47,8 @@ const Beta = () => {
         {/* Main Content */}
         {pullContactsQuery.isFetching ? (
           <Skeleton
-            sx={{ bgcolor: "grey.200" ,height:'50vh'}}
+            sx={{ bgcolor: "grey.200", height: "50vh" }}
             variant="rectangular"
-           
           />
         ) : (
           <Paper elevation={3} sx={{ p: 2 }}>

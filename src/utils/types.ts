@@ -1,5 +1,5 @@
-import { GridInputRowSelectionModel } from "@mui/x-data-grid";
-import { Dispatch, SetStateAction } from "react";
+import type { GridCellParams, GridRowSelectionModel } from "@mui/x-data-grid";
+import type { Dispatch, MutableRefObject, SetStateAction } from "react";
 
 export type Contact = {
   properties: {
@@ -16,9 +16,10 @@ export type AppContextType = {
   numOfContacts: number;
   setNumOfContacts: Dispatch<SetStateAction<number>>;
   indexSetCount: number;
-  addIndexToSet: (cell: any, index: number) => void;
-  removeIndexFromSet: (cell: any, index: number) => void;
-  handleFilterContacts: () => void;
-  selectionModel: GridInputRowSelectionModel;
-  setSelectionModel: Dispatch<SetStateAction<GridInputRowSelectionModel>>;
+  addIndexToSet: (cell: GridCellParams, index: number) => void;
+  removeIndexFromSet: (cell: GridCellParams, index: number) => void;
+  handleFilterContacts: (set: Set<unknown>) => void;
+  selectionModel: GridRowSelectionModel;
+  setSelectionModel: Dispatch<SetStateAction<GridRowSelectionModel>>;
+  refIndexesToFilterOut: MutableRefObject<Set<unknown>>;
 };
