@@ -39,7 +39,6 @@ export const hubspotRouter = createTRPCRouter({
       return await batchCreateContactsPost({
         contacts,
         accountType: input.accountType,
-        err,
       });
     }),
 
@@ -167,7 +166,7 @@ async function batchCreateContactsPost({
   } catch (err: any) {
     return await fallBackCreateContactPosts({
       contacts,
-      accountType: input.accountType,
+      accountType,
       err,
     });
   }
