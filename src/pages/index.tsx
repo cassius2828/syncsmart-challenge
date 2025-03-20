@@ -314,19 +314,7 @@ export function ContactsModal(props: Props) {
           </Typography>
         </StyledBox>
         <StyledBox sx={{ px: 2, pb: 2, height: "100%", overflow: "auto" }}>
-          {props.contacts.map((contact, idx) => {
-            const { firstname, lastname, email } = contact.properties;
-            return (
-              <Box
-                key={idx}
-                sx={{ my: 1, p: 1, border: "1px solid #ccc", borderRadius: 1 }}
-              >
-                <Typography variant="body1">
-                  {firstname} {lastname} - {email} : {idx + 1}
-                </Typography>
-              </Box>
-            );
-          })}
+          <DataTable contacts={props.contacts} />
         </StyledBox>
       </SwipeableDrawer>
     </Root>
@@ -392,47 +380,65 @@ import Paper from "@mui/material/Paper";
 
 const columns: GridColDef[] = [
   { field: "id", headerName: "ID", width: 70 },
-  { field: "firstName", headerName: "First name", width: 130 },
-  { field: "lastName", headerName: "Last name", width: 130 },
+  { field: "firstname", headerName: "First name", width: 150 },
+  { field: "lastname", headerName: "Last name", width: 150 },
   {
-    field: "age",
-    headerName: "Age",
-    type: "number",
-    width: 90,
-  },
-  {
-    field: "fullName",
-    headerName: "Full name",
-    description: "This column has a value getter and is not sortable.",
-    sortable: false,
-    width: 160,
-    valueGetter: (value, row) => `${row.firstName || ""} ${row.lastName || ""}`,
+    field: "phone",
+    headerName: "phone",
+    type: "string",
+    width: 150,
   },
 ];
 
-const rows = [
-  { id: 1, lastName: "Snow", firstName: "Jon", age: 35 },
-  { id: 2, lastName: "Lannister", firstName: "Cersei", age: 42 },
-  { id: 3, lastName: "Lannister", firstName: "Jaime", age: 45 },
-  { id: 4, lastName: "Stark", firstName: "Arya", age: 16 },
-  { id: 5, lastName: "Targaryen", firstName: "Daenerys", age: null },
-  { id: 6, lastName: "Melisandre", firstName: null, age: 150 },
-  { id: 7, lastName: "Clifford", firstName: "Ferrara", age: 44 },
-  { id: 8, lastName: "Frances", firstName: "Rossini", age: 36 },
-  { id: 9, lastName: "Roxie", firstName: "Harvey", age: 65 },
-];
+// const rows = [
+//   { id: 1, lastname: "Snow", firstname: "Jon", phone: "+14486989603" },
+//   { id: 1, lastname: "Snow", firstname: "Jon", phone: "+14486989603" },
+//   { id: 1, lastname: "Snow", firstname: "Jon", phone: "+14486989603" },
+//   { id: 1, lastname: "Snow", firstname: "Jon", phone: "+14486989603" },
+//   { id: 1, lastname: "Snow", firstname: "Jon", phone: "+14486989603" },
+//   { id: 1, lastname: "Snow", firstname: "Jon", phone: "+14486989603" },
+//   { id: 1, lastname: "Snow", firstname: "Jon", phone: "+14486989603" },
 
-const paginationModel = { page: 0, pageSize: 5 };
+// ];
 
-export function DataTable() {
+const paginationModel = { page: 0, pageSize: 25 };
+
+export function DataTable({ contacts }: { contacts: Contact[] }) {
+  const rows = contacts.map((contact, idx) => {
+    const { firstname, lastname, email, phone } = contact.properties;
+    return {
+      id: idx + 1,
+      firstname,
+      lastname,
+      email,
+      phone,
+      isChecked: false,
+    };
+  });
+  const contactIndicesToFilterOut = new Set();
+  const handleSetInsertionAndDeletion = (cell) => {
+    if (!cell.row.isChecked) {
+      cell.row.isChecked = true;
+      contactIndicesToFilterOut.add(cell.id - 1);
+    } else {
+      cell.row.isChecked = false;
+      if (contactIndicesToFilterOut.has(cell.id - 1)) {
+        contactIndicesToFilterOut.delete(cell.id - 1);
+      }
+    }
+  };
+
   return (
     <Paper sx={{ height: 400, width: "100%" }}>
       <DataGrid
         rows={rows}
         columns={columns}
         initialState={{ pagination: { paginationModel } }}
-        pageSizeOptions={[5, 10]}
+        pageSizeOptions={[25, 100]}
         checkboxSelection
+        onCellClick={(cell) => {
+          handleSetInsertionAndDeletion(cell);
+        }}
         sx={{ border: 0 }}
       />
     </Paper>
