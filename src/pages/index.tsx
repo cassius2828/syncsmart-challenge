@@ -140,9 +140,7 @@ export const ActionBtnContainer = ({
             color="warning"
             size="small"
           >
-            {isPending
-              ? "Sending contacts to alpha..."
-              : "Generate Accounts in Alpha"}
+            {isPending ? "Handling Your Data..." : "Generate Accounts in Alpha"}
           </Button>
           <label className={styles.numberInputLabel}>
             select how many contacts you want to upload
@@ -179,7 +177,9 @@ export const ActionBtnContainer = ({
             sx={{ color: "white", width: "100%", borderColor: "white" }}
             size="small"
           >
-            Pull From Alpha and Create in Beta
+            {isPending
+              ? "Handling Your Data..."
+              : " Pull From Alpha and Create in Beta"}
           </Button>
         </Container>
       </Container>
@@ -202,7 +202,6 @@ import { styled } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { grey } from "@mui/material/colors";
 import Box from "@mui/material/Box";
-import Skeleton from "@mui/material/Skeleton";
 import Typography from "@mui/material/Typography";
 import SwipeableDrawer from "@mui/material/SwipeableDrawer";
 
@@ -439,6 +438,7 @@ export function DataTable({ contacts }: { contacts: Contact[] }) {
   return (
     <Paper sx={{ height: 400, width: "100%" }}>
       <DataGrid
+      className="disable-select-all"
         rows={rows}
         columns={columns}
         initialState={{ pagination: { paginationModel } }}

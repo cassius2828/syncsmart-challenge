@@ -22,9 +22,7 @@ export default function Navbar() {
             edge="start"
             aria-label="menu"
             sx={{ mr: 2, color: "#e36537" }}
-          >
-            <MenuIcon sx={{ display: { xs: "block", lg: "none" } }} />
-          </IconButton>
+          ></IconButton>
           <Container
             sx={{
               display: "flex",
@@ -33,17 +31,44 @@ export default function Navbar() {
             }}
           >
             <Link href={"/"}>
-              <Button color="" variant="contained" sx={{ color: "#e36537" }}>
+              <Button
+                color=""
+                variant="contained"
+                sx={{
+                  color: "#e36537",
+                  fontSize: { xs: "0.75rem", sm: "1rem" },
+                  px: { xs: "4px", sm: ".75rem" },
+                  width: { xs: "9rem", md: "14rem" },
+                }}
+              >
                 Home
               </Button>
             </Link>
             <Link href={"/dashboard/alpha"}>
-              <Button color="" variant="contained" sx={{ color: "#e36537" }}>
+              <Button
+                color=""
+                variant="contained"
+                sx={{
+                  color: "#e36537",
+                  fontSize: { xs: "0.75rem", sm: "1rem" },
+                  px: { xs: "4px", sm: ".75rem" },
+                  width: { xs: "9rem", md: "14rem" },
+                }}
+              >
                 Alpha Dashboard
               </Button>
             </Link>
             <Link href={"/dashboard/beta"}>
-              <Button color="" variant="contained" sx={{ color: "#e36537" }}>
+              <Button
+                color=""
+                variant="contained"
+                sx={{
+                  color: "#e36537",
+                  fontSize: { xs: "0.75rem", sm: "1rem" },
+                  px: { xs: "4px", sm: ".75rem" },
+                  width: { xs: "9rem", md: "14rem" },
+                }}
+              >
                 Beta Dashboard
               </Button>
             </Link>
