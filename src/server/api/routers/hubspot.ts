@@ -43,9 +43,15 @@ export const hubspotRouter = createTRPCRouter({
     }),
 
   // PULL FROM ALPHA PORTAL
-  pullFromAlpha: publicProcedure.query(async () => {
-    return await pullFromAlphaServiceFn();
-  }),
+  pullFromAlpha: publicProcedure
+    .input(
+      z.object({
+        accountType: z.string(),
+      })
+    )
+    .query(async ({ input }) => {
+      return await pullFromAlphaServiceFn(input.accountType);
+    }),
 });
 
 ///////////////////////////
@@ -173,11 +179,15 @@ async function batchCreateContactsPost({
 }
 
 // fetch contacts from alpha portal
-async function pullFromAlphaServiceFn() {
+async function pullFromAlphaServiceFn(accountType: string) {
+  const token =
+    accountType === "alpha"
+      ? process.env.NEXT_PUBLIC_ALPHA_HUBSPOT_API_TOKEN
+      : process.env.NEXT_PUBLIC_BETA_HUBSPOT_API_TOKEN;
   try {
     const options = {
       headers: {
-        Authorization: `Bearer ${process.env.NEXT_PUBLIC_ALPHA_HUBSPOT_API_TOKEN}`,
+        Authorization: `Bearer ${token}`,
       },
     };
     const res = await axios.get(readObjectContactsURL, options);

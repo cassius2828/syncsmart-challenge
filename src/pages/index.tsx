@@ -224,7 +224,7 @@ const Root = styled("div")(({ theme }) => ({
   }),
 }));
 
-const StyledBox = styled("div")(({ theme }) => ({
+export const StyledBox = styled("div")(({ theme }) => ({
   backgroundColor: "#fff",
   ...theme.applyStyles("dark", {
     backgroundColor: grey[800],
@@ -275,7 +275,7 @@ export function ContactsModal(props: Props) {
         sx={{
           color: "white",
           outline: "solid 1px white",
-          backgroundColor: "orange",
+          backgroundColor: "#e36537",
         }}
         size="small"
         onClick={toggleDrawer(true)}
