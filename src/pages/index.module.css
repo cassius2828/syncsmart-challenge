@@ -4,7 +4,7 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background-image: linear-gradient(to bottom, #2e026d, #15162c);
+  background-image: linear-gradient(to bottom, #e36537, #ebd7bc);
 }
 
 .container {
@@ -178,5 +178,23 @@
 
 .actionBtnContainer {
   display: flex;
+  height: 3rem;
   gap: 2rem;
+}
+
+.numberInputLabel {
+  margin: 4px;
+  text-align: start;
+}
+
+.checkContactsEmoji {
+  position: absolute;
+  left: 2.25rem;
+  top: 14px;
+}
+
+@media (max-width: 768px) {
+  .actionBtnContainer {
+    flex-direction: column;
+  }
 }
