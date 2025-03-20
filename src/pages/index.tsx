@@ -253,7 +253,7 @@ const Puller = styled("div")(({ theme }) => ({
 export function ContactsModal(props: Props) {
   const { window } = props;
   const [open, setOpen] = React.useState(false);
-
+  const { indexSetCount } = useAppContext();
   const toggleDrawer = (newOpen: boolean) => () => {
     setOpen(newOpen);
   };
@@ -311,6 +311,16 @@ export function ContactsModal(props: Props) {
           <Puller />
           <Typography sx={{ p: 2, color: "text.secondary" }}>
             {props.contacts.length} contacts ready
+            {indexSetCount > 0 && (
+              <Button
+                variant="contained"
+                size="small"
+                color="error"
+                sx={{ marginLeft: "1rem" }}
+              >
+                remove selected contacts
+              </Button>
+            )}
           </Typography>
         </StyledBox>
         <StyledBox sx={{ px: 2, pb: 2, height: "100%", overflow: "auto" }}>
@@ -377,6 +387,7 @@ export const StatusModal = ({ success, setSuccess, error, setError }) => {
 
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import Paper from "@mui/material/Paper";
+import { useAppContext } from "coding-challenge/context/useAppContext";
 
 const columns: GridColDef[] = [
   { field: "id", headerName: "ID", width: 70 },
@@ -404,6 +415,7 @@ const columns: GridColDef[] = [
 const paginationModel = { page: 0, pageSize: 25 };
 
 export function DataTable({ contacts }: { contacts: Contact[] }) {
+  const { removeIndexFromSet, addIndexToSet } = useAppContext();
   const rows = contacts.map((contact, idx) => {
     const { firstname, lastname, email, phone } = contact.properties;
     return {
@@ -412,20 +424,12 @@ export function DataTable({ contacts }: { contacts: Contact[] }) {
       lastname,
       email,
       phone,
-      isChecked: false,
     };
   });
-  const contactIndicesToFilterOut = new Set();
+
   const handleSetInsertionAndDeletion = (cell) => {
-    if (!cell.row.isChecked) {
-      cell.row.isChecked = true;
-      contactIndicesToFilterOut.add(cell.id - 1);
-    } else {
-      cell.row.isChecked = false;
-      if (contactIndicesToFilterOut.has(cell.id - 1)) {
-        contactIndicesToFilterOut.delete(cell.id - 1);
-      }
-    }
+    addIndexToSet(cell, cell.id - 1);
+    removeIndexFromSet(cell, cell.id - 1);
   };
 
   return (
@@ -438,6 +442,7 @@ export function DataTable({ contacts }: { contacts: Contact[] }) {
         checkboxSelection
         onCellClick={(cell) => {
           handleSetInsertionAndDeletion(cell);
+          console.log(cell);
         }}
         sx={{ border: 0 }}
       />
