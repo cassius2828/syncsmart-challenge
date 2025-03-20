@@ -1,5 +1,9 @@
 import { postRouter } from "coding-challenge/server/api/routers/post";
-import { createCallerFactory, createTRPCRouter } from "coding-challenge/server/api/trpc";
+import { hubspotRouter } from "./routers/hubspot";
+import {
+  createCallerFactory,
+  createTRPCRouter,
+} from "coding-challenge/server/api/trpc";
 
 /**
  * This is the primary router for your server.
@@ -8,6 +12,7 @@ import { createCallerFactory, createTRPCRouter } from "coding-challenge/server/a
  */
 export const appRouter = createTRPCRouter({
   post: postRouter,
+  hubspot: hubspotRouter,
 });
 
 // export type definition of API

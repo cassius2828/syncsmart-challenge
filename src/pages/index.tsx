@@ -6,25 +6,24 @@ import { api } from "coding-challenge/utils/api";
 import styles from "./index.module.css";
 import { useEffect, useState } from "react";
 import type { Contact } from "coding-challenge/utils/types";
-import axios from 'axios'
-import { handleDownload } from "coding-challenge/utils/utils";
+
+
 
 export default function Home() {
-  // const hello = api.post.hello.useQuery({ text: "from tRPC" });
   const [contacts, setContacts] = useState<Contact[]>([]);
-  const addContactsToAlpha = () => {
-    console.log("test");
-  };
+  const addContactsMutation =
+    api.hubspot.addContactsToAlpha.useMutation();
+
   const fetchContactsFromFaker = () => {
-    const emptyContacts = Array.from({ length: 100 });
+    const emptyContacts = Array.from({ length: 5 });
     return () => {
       return emptyContacts.map((_, idx) => {
-        const firstName = faker.person.firstName();
-        const lastName = faker.person.lastName();
+        const firstname = faker.person.firstName();
+        const lastname = faker.person.lastName();
         const obj = {
-          firstName,
-          lastName,
-          email: `${firstName}.${lastName}@gmail.com`,
+          firstname,
+          lastname,
+          email: `${firstname}.${lastname}@gmail.com`,
           id: idx + 1,
         };
         return obj;
@@ -33,7 +32,7 @@ export default function Home() {
   };
   useEffect(() => {
     const addContactsToState = fetchContactsFromFaker();
-    if (!contacts[43]) setContacts(addContactsToState());
+    if (!contacts[3]) setContacts(addContactsToState());
   }, []);
 
   return (
@@ -50,7 +49,11 @@ export default function Home() {
           </h1>
 
           <div className={styles.showcaseContainer}>
-            <ActionBtnContainer handleAddContactsToAlpha={addContactsToAlpha} />
+            <ActionBtnContainer
+              isPending={addContactsMutation.isPending}
+              handleAddContactsToAlpha={()=> addContactsMutation.mutate({contacts})}
+              contacts={contacts}
+            />
             <AuthShowcase />
           </div>
         </div>
@@ -84,11 +87,14 @@ function AuthShowcase() {
 }
 
 export const ActionBtnContainer = ({
+  contacts,
   handleAddContactsToAlpha,
+  isPending,
 }: {
+  contacts: Contact[];
   handleAddContactsToAlpha: () => void;
+  isPending: boolean;
 }) => {
-  handleDownload
   return (
     <>
       <Container className={styles.actionBtnContainer}>
@@ -99,7 +105,9 @@ export const ActionBtnContainer = ({
           color="secondary"
           size="small"
         >
-          Generate Accounts in Alpha
+          {isPending
+            ? "Sending contacts to alpha..."
+            : "Generate Accounts in Alpha"}
         </Button>
         <Button
           variant="outlined"
