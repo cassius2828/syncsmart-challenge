@@ -7,12 +7,23 @@ import styles from "./index.module.css";
 import { useEffect, useState } from "react";
 import type { Contact } from "coding-challenge/utils/types";
 
-
-
 export default function Home() {
   const [contacts, setContacts] = useState<Contact[]>([]);
-  const addContactsMutation =
-    api.hubspot.addContactsToAlpha.useMutation();
+  const addContactsMutation = api.hubspot.addContactsToAlpha.useMutation();
+  const pullContactsQuery = api.hubspot.pullFromAlpha.useQuery(undefined, {
+    enabled: false,
+  });
+
+  const handlePullContactsFromAlpha = async () => {
+
+
+    const result = await pullContactsQuery.refetch();
+    if (result.data?.success) {
+      console.log("Contacts:", result.data.hubspotResponse);
+    } else {
+      console.error("Failed to fetch contacts:", result.data?.error);
+    }
+  }
 
   const fetchContactsFromFaker = () => {
     const emptyContacts = Array.from({ length: 5 });
@@ -50,8 +61,11 @@ export default function Home() {
 
           <div className={styles.showcaseContainer}>
             <ActionBtnContainer
+              handlePullContactsFromAlpha={handlePullContactsFromAlpha}
               isPending={addContactsMutation.isPending}
-              handleAddContactsToAlpha={()=> addContactsMutation.mutate({contacts})}
+              handleAddContactsToAlpha={() =>
+                addContactsMutation.mutate({ contacts })
+              }
               contacts={contacts}
             />
             <AuthShowcase />
@@ -89,10 +103,12 @@ function AuthShowcase() {
 export const ActionBtnContainer = ({
   contacts,
   handleAddContactsToAlpha,
+  handlePullContactsFromAlpha,
   isPending,
 }: {
   contacts: Contact[];
   handleAddContactsToAlpha: () => void;
+  handlePullContactsFromAlpha: () => Contact[];
   isPending: boolean;
 }) => {
   return (
@@ -110,6 +126,7 @@ export const ActionBtnContainer = ({
             : "Generate Accounts in Alpha"}
         </Button>
         <Button
+          onClick={handlePullContactsFromAlpha}
           variant="outlined"
           sx={{ color: "white", borderColor: "white" }}
           size="medium"
