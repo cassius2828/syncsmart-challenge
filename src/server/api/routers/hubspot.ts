@@ -10,6 +10,7 @@ import { type Contact } from "coding-challenge/utils/types";
 // * Batch = 1 call, all data in or none in
 // * Single = allows succeeding data to prevail and failed to stay out, also allows for optional fields to be included
 const batchContactsCreateURL = `https://api.hubapi.com/crm/v3/objects/contacts/batch/create`;
+const singleContactCreateURL = `https://api.hubapi.com/crm/v3/objects/contacts/`;
 const readObjectContactsURL = `https://api.hubapi.com/crm/v3/objects/contacts?limit=100&properties=phone&properties=firstname&properties=lastname&properties=email`;
 
 const contactInputSchema = z.array(
@@ -36,8 +37,7 @@ export const hubspotRouter = createTRPCRouter({
 
       const batchBody = {
         inputs: contacts.map((contact) => {
-          const { firstname, lastname, email, phone } =
-            contact.properties;
+          const { firstname, lastname, email, phone } = contact.properties;
           return {
             properties: {
               firstname,
@@ -54,22 +54,37 @@ export const hubspotRouter = createTRPCRouter({
           input.accountType === "alpha"
             ? process.env.NEXT_PUBLIC_ALPHA_HUBSPOT_API_TOKEN
             : process.env.NEXT_PUBLIC_BETA_HUBSPOT_API_TOKEN;
-        console.log(token, "token");
-        const res = await axios.post(batchContactsCreateURL, batchBody, {
+
+        const options = {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-        });
+        };
+
+        const res = await axios.post(
+          batchContactsCreateURL,
+          batchBody,
+          options
+        );
 
         console.log("HubSpot Batch Response:", res.data);
-
+        if (res.data?.result?.data?.error?.category === "CONFLICT") {
+          // 🛑 Batch failed — handle fallback
+          throw new Error("BATCH_CONFLICT");
+        }
         return {
           success: true,
           message: `Successfully added ${contacts.length} contacts.`,
           hubspotResponse: res.data,
         };
       } catch (err: any) {
+        return await fallBackCreateContactPosts({
+          contacts,
+          accountType: input.accountType,
+          err,
+        });
+
         console.error(
           "Batch create failed:",
           err.response?.data || err.message
@@ -81,6 +96,7 @@ export const hubspotRouter = createTRPCRouter({
         };
       }
     }),
+  // PULL FROM ALPHA PORTAL
   pullFromAlpha: publicProcedure.query(async () => {
     try {
       const options = {
@@ -89,7 +105,7 @@ export const hubspotRouter = createTRPCRouter({
         },
       };
       const res = await axios.get(readObjectContactsURL, options);
-console.log(res, ' <-- res obj pull')
+      console.log(res, " <-- res obj pull");
       return {
         success: true,
         message: `Successfully fetched ${res.data?.results.length} contacts from Portal Alpha.`,
@@ -105,3 +121,66 @@ console.log(res, ' <-- res obj pull')
     }
   }),
 });
+
+async function fallBackCreateContactPosts({
+  contacts,
+  accountType,
+  err,
+}: {
+  contacts: Contact[];
+  accountType: string;
+  err: any;
+}) {
+  const isConflict =
+    err.message === "BATCH_CONFLICT" ||
+    err.response?.data?.category === "CONFLICT";
+
+  if (isConflict) {
+    console.warn(`Batch conflict -- falling back to individual POSTs`);
+  }
+  const successes: Contact[] = [];
+  const failures: { contact: Contact; error: string }[] = [];
+
+  const token =
+    accountType === "alpha"
+      ? process.env.NEXT_PUBLIC_ALPHA_HUBSPOT_API_TOKEN
+      : process.env.NEXT_PUBLIC_BETA_HUBSPOT_API_TOKEN;
+
+  for (const contact of contacts) {
+    const { firstname, lastname, email, phone } = contact.properties;
+    const singleBody = {
+      properties: {
+        firstname,
+        lastname,
+        phone,
+        email,
+      },
+    };
+    const options = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    };
+    try {
+      await axios.post(singleContactCreateURL, singleBody, options);
+      successes.push(contact);
+    } catch (err) {
+      console.error(
+        `Failed to add contact. First Name: ${firstname} \n Last Name: ${lastname} \n Email: ${email}`
+      );
+      failures.push({
+        contact,
+        error: err.message || "Failed to add contact",
+      });
+    }
+  }
+  return {
+    success: failures.length === 0,
+    message: `Fallback complete. ${successes.length} succeeded, ${failures.length} failed. `,
+    results: {
+      successes,
+      failures,
+    },
+  };
+}
