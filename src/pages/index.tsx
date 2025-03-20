@@ -9,21 +9,22 @@ import type { Contact } from "coding-challenge/utils/types";
 
 export default function Home() {
   const [contacts, setContacts] = useState<Contact[]>([]);
-  const addContactsMutation = api.hubspot.addContactsToAlpha.useMutation();
+  const addContactsMutation = api.hubspot.addContacts.useMutation();
   const pullContactsQuery = api.hubspot.pullFromAlpha.useQuery(undefined, {
     enabled: false,
   });
 
   const handlePullContactsFromAlpha = async () => {
-
-
     const result = await pullContactsQuery.refetch();
+    console.log(result.data?.hubspotResponse.results, ' <-- RESULT \n ===========\n===========')
     if (result.data?.success) {
       console.log("Contacts:", result.data.hubspotResponse);
+      addContactsMutation.mutate({ contacts: result.data.hubspotResponse.results , accountType: "beta" });
+   
     } else {
       console.error("Failed to fetch contacts:", result.data?.error);
     }
-  }
+  };
 
   const fetchContactsFromFaker = () => {
     const emptyContacts = Array.from({ length: 5 });
@@ -32,10 +33,12 @@ export default function Home() {
         const firstname = faker.person.firstName();
         const lastname = faker.person.lastName();
         const obj = {
-          firstname,
-          lastname,
-          email: `${firstname}.${lastname}@gmail.com`,
-          id: idx + 1,
+          properties: {
+            firstname,
+            lastname,
+            email: `${firstname}.${lastname}@gmail.com`,
+            id: idx + 1,
+          },
         };
         return obj;
       });
@@ -64,7 +67,7 @@ export default function Home() {
               handlePullContactsFromAlpha={handlePullContactsFromAlpha}
               isPending={addContactsMutation.isPending}
               handleAddContactsToAlpha={() =>
-                addContactsMutation.mutate({ contacts })
+                addContactsMutation.mutate({ contacts, accountType: "alpha" })
               }
               contacts={contacts}
             />
