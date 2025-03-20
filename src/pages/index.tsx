@@ -15,12 +15,7 @@ export default function Home() {
     enabled: false,
   });
 
-  // const handleFilterContacts = (arr) => {
-  //   const filteredContacts = contacts.filter((contact, idx) =>
-  //     arr.includes(idx)
-  //   );
-  //   setContacts(filteredContacts);
-  // };
+
 
   const handlePullContactsFromAlpha = async () => {
     const result = await pullContactsQuery.refetch();
@@ -253,7 +248,7 @@ const Puller = styled("div")(({ theme }) => ({
 
 export function ContactsModal(props: Props) {
   const { window } = props;
-  const { contacts } = useAppContext();
+  const { contacts, handleFilterContacts,refIndexesToFilterOut } = useAppContext();
   const [open, setOpen] = React.useState(false);
   const { indexSetCount } = useAppContext();
   const toggleDrawer = (newOpen: boolean) => () => {
@@ -319,6 +314,7 @@ export function ContactsModal(props: Props) {
                 size="small"
                 color="error"
                 sx={{ marginLeft: "1rem" }}
+                onClick={()=> handleFilterContacts(refIndexesToFilterOut.current)}
               >
                 remove selected contacts
               </Button>

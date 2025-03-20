@@ -4,7 +4,7 @@ export type Contact = {
   properties: {
     firstname: string;
     lastname: string;
-    phone:string;
+    phone: string;
     email: string;
   };
 };
@@ -17,4 +17,5 @@ export type AppContextType = {
   indexSetCount: number;
   addIndexToSet: (cell: any, index: number) => void;
   removeIndexFromSet: (cell: any, index: number) => void;
-}
+  handleFilterContacts: () => void;
+};

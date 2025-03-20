@@ -26,6 +26,23 @@ export const AppProvider = ({ children }) => {
       console.log(refIndexesToFilterOut.current, " <-- remove from set");
     }
   };
+
+  const handleFilterContacts = (set: Set<number>) => {
+    let arr = [];
+    for(const val of set){
+        arr.push(val)
+    }
+
+    const filteredContacts = contacts.filter((contact, idx) =>
+      !arr.includes(idx)
+    );
+    console.log(filteredContacts);
+    console.log(arr);
+    setContacts(filteredContacts);
+    refIndexesToFilterOut.current = {}
+    setIndexSetCount(refIndexesToFilterOut.current.size)
+    console.log(refIndexesToFilterOut)
+  };
   return (
     <AppContext.Provider
       value={{
@@ -37,6 +54,7 @@ export const AppProvider = ({ children }) => {
         setContacts,
         numOfContacts,
         setNumOfContacts,
+        handleFilterContacts,
       }}
     >
       {children}
