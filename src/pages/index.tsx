@@ -36,7 +36,7 @@ export default function Home() {
 
   const fetchContactsFromFaker = () => {
     const emptyContacts = Array.from({ length: numOfContacts || 100 });
-
+    console.log("ran faker =======\n===========\n==========\n");
     return emptyContacts.map((_, idx) => {
       const firstname = faker.person.firstName();
       const lastname = faker.person.lastName();
@@ -87,11 +87,10 @@ export default function Home() {
               isPending={addContactsMutation.isPending}
               handleAddContactsToAlpha={() => {
                 addContactsMutation.mutate({
-                  contacts: contacts.slice(0, numOfContacts),
+                  contacts,
                   accountType: "alpha",
                 });
-                // siince state is batched, this will reset the contacts to a new 100
-                // while the old contacts are still used from the slice
+                // since state is batched, this will reset the contacts to a new 100
                 setContacts(fetchContactsFromFaker());
                 setNumOfContacts(100);
               }}

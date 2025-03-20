@@ -26,8 +26,6 @@ Upon accomplishing the base requirements, I was excited to test myself by diving
 
 A user can choose how many contacts to send to the alpha portal. The default is 100, and that data is processed and run on the initial render of the site. To confirm the amount, users must click the “Set” button — a green check appears once confirmed.
 
-To maintain efficiency, contacts are not regenerated when lowering the count. Instead, I used a separate state variable synced to the desired contact count. While this value can change and be reconfirmed, the actual contact state remains unchanged until execution. Example: changing from 100 to 75 slices the contact list without regeneration. New faker contacts are only generated once per mutation.
-
 
 
 ## 🚫 Contact Removal Before Sending
@@ -55,7 +53,9 @@ When a batch POST fails, I catch specific errors (BATCH_ERROR, CONFLICT) and fal
 
 There are two dashboards synced with the actual HubSpot test portals. Users can verify contact mutations without leaving the app. The dashboards render a table of contacts using a query function that requires a refetch() to trigger — ensuring it only runs when needed (e.g., on page visit). One optimization would be moving this state to context to avoid redundant fetches.
 
+## Portal Limitations
 
+Hubspot only allows us to batch 100 contacts at a time, so when we display the contacts in our dashboards, we are only seeing 100 of the items at a time. If we wanted to show all of the contacts in the portal, we would need to find a way to select certain contacts out of the available in the hubspot portal and then spread those in to our state over the course of multiple calls to get all contacts. If would also be quite slow in this implementation since the batches would fail due to duplicate contacts and the fallback method of single post mutations would kick in. 
 
 ## ✅ Summary
 
