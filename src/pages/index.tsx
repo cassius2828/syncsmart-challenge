@@ -121,6 +121,8 @@ export const ActionBtnContainer = ({
   isPending: boolean;
 }) => {
   const [areContactsSet, setAreContactsSet] = useState<boolean>(false);
+  const [success, setSuccess] = useState<string>("test");
+  const [error, setError] = useState<string>("gfssa");
   const handleSetContacts = () => {
     setNewAmountOfContacts();
     setAreContactsSet(true);
@@ -185,10 +187,19 @@ export const ActionBtnContainer = ({
           </Button>
         </Container>
       </Container>
+      {(success || error) && (
+        <StatusModal
+          setSuccess={setSuccess}
+          error={error}
+          setError={setError}
+          success={success}
+        />
+      )}
     </>
   );
 };
 
+// from material ui library ⬇️
 import * as React from "react";
 import { Global } from "@emotion/react";
 import { styled } from "@mui/material/styles";
@@ -261,14 +272,18 @@ export function ContactsModal(props: Props) {
         }}
       />
 
-        <Button
-          variant="contained"
-          sx={{ color: "white",outline:'solid 1px white', backgroundColor:'orange' }}
-          size="small"
-          onClick={toggleDrawer(true)}
-        >
-          Open
-        </Button>
+      <Button
+        variant="contained"
+        sx={{
+          color: "white",
+          outline: "solid 1px white",
+          backgroundColor: "orange",
+        }}
+        size="small"
+        onClick={toggleDrawer(true)}
+      >
+        Open
+      </Button>
 
       <SwipeableDrawer
         container={container}
@@ -339,3 +354,33 @@ function AuthShowcase() {
     </div>
   );
 }
+
+export const StatusModal = ({ success, setSuccess, error, setError }) => {
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     setSuccess("");
+  //     setError("");
+  //   }, 3000);
+  // }, []);
+  const title = success ? "Success!" : error ? "Error" : "";
+  const message = success || error;
+  return (
+    <Modal
+      onClose={() => {
+        setSuccess("");
+        setError("");
+      }}
+      aria-labelledby="modal-modal-title"
+      aria-describedby="modal-modal-description"
+    >
+      <Box>
+        <Typography id="modal-modal-title" variant="h6" component="h2">
+          {title}
+        </Typography>
+        <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+          {message}
+        </Typography>
+      </Box>
+    </Modal>
+  );
+};
