@@ -1,6 +1,6 @@
 import { GridRowSelectionModel } from "@mui/x-data-grid";
 import { type Contact } from "coding-challenge/utils/types";
-import { createContext, useRef, useState } from "react";
+import { createContext, useEffect, useRef, useState } from "react";
 
 export const AppContext = createContext(undefined);
 
@@ -39,10 +39,18 @@ export const AppProvider = ({ children }) => {
     const filteredContacts = contacts.filter((_, idx) => !arr.includes(idx));
 
     setContacts(filteredContacts);
-    refIndexesToFilterOut.current = {};
+    refIndexesToFilterOut.current = new Set()
     setIndexSetCount(refIndexesToFilterOut.current.size);
     setSelectionModel([]);
   };
+  useEffect(() => {
+    if (contacts) {
+      setNumOfContacts(contacts.length);
+      // keeps out filter logic in sync to avoid accessing indexes that are outside the contacts array
+      refIndexesToFilterOut.current = new Set()
+      setIndexSetCount(refIndexesToFilterOut.current.size);
+    }
+  }, [contacts]);
   return (
     <AppContext.Provider
       value={{
