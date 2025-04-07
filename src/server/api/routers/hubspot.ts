@@ -85,6 +85,7 @@ async function fallBackCreateContactPosts({
     accountType === "alpha"
       ? process.env.NEXT_PUBLIC_ALPHA_HUBSPOT_API_TOKEN
       : process.env.NEXT_PUBLIC_BETA_HUBSPOT_API_TOKEN;
+      
   // * create arr of Promises to run all concurrently
   const contactPromises = contacts.map(async (contact) => {
     const { firstname, lastname, email, phone } = contact.properties;
