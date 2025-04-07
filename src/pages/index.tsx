@@ -19,14 +19,15 @@ export default function Home() {
 
   const handlePullContactsFromAlpha = async () => {
     const result = await pullContactsQuery.refetch();
+    const hubspotResponse = result.data?.hubspotResponse as { results: Contact[] };
     console.log(
-      result.data?.hubspotResponse.results,
+      hubspotResponse.results,
       " <-- RESULT \n ===========\n==========="
     );
     if (result.data?.success) {
       console.log("Contacts:", result.data.hubspotResponse);
       addContactsMutation.mutate({
-        contacts: result.data.hubspotResponse.results,
+        contacts: ((result.data?.hubspotResponse as { results: Contact[] })?.results || []),
         accountType: "beta",
       });
     } else {

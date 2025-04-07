@@ -26,11 +26,13 @@ const Alpha = () => {
     }
   };
   useEffect(() => {
-    setAlphaContacts(pullContactsQuery.data?.hubspotResponse.results || []);
+    setAlphaContacts(
+      ((pullContactsQuery.data?.hubspotResponse as { results: Contact[] } | undefined)?.results) ?? []
+    );
   }, [pullContactsQuery.data]);
 
   useEffect(() => {
-    fetchAlphaContacts();
+    void fetchAlphaContacts();
   }, []);
   return (
     <>

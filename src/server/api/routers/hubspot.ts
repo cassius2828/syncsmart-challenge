@@ -66,14 +66,17 @@ async function fallBackCreateContactPosts({
 }: {
   contacts: Contact[];
   accountType: string;
-  err: any;
+  err: unknown;
 }) {
-  const isConflict =
-    err.message === "BATCH_CONFLICT" ||
-    err.response?.data?.category === "CONFLICT";
+  if (typeof err === "object" && err !== null) {
+    const errorObj = err as { message?: string; response?: object };
+    const isConflict =
+      errorObj.message === "BATCH_CONFLICT" ||
+      errorObj.response?.data?.category === "CONFLICT";
 
-  if (isConflict) {
-    console.warn(`Batch conflict -- falling back to individual POSTs`);
+    if (isConflict) {
+      console.warn(`Batch conflict -- falling back to individual POSTs`);
+    }
   }
   const successes: Contact[] = [];
   const failures: { contact: Contact; error: string }[] = [];
@@ -82,8 +85,8 @@ async function fallBackCreateContactPosts({
     accountType === "alpha"
       ? process.env.NEXT_PUBLIC_ALPHA_HUBSPOT_API_TOKEN
       : process.env.NEXT_PUBLIC_BETA_HUBSPOT_API_TOKEN;
-
-  for (const contact of contacts) {
+  // * create arr of Promises to run all concurrently
+  const contactPromises = contacts.map(async (contact) => {
     const { firstname, lastname, email, phone } = contact.properties;
     const singleBody = {
       properties: {
@@ -99,19 +102,19 @@ async function fallBackCreateContactPosts({
         "Content-Type": "application/json",
       },
     };
-    try {
-      await axios.post(singleContactCreateURL, singleBody, options);
-      successes.push(contact);
-    } catch (err: any) {
-      console.error(
-        `Failed to add contact. First Name: ${firstname} \n Last Name: ${lastname} \n Email: ${email}`
-      );
-      failures.push({
-        contact,
-        error: err.message || "Failed to add contact",
+    await axios
+      .post(singleContactCreateURL, singleBody, options)
+      .then((_) => successes.push(contact))
+      .catch((err) => {
+        failures.push({
+          contact,
+          error: err.message || "Failed to add contact",
+        });
       });
-    }
-  }
+
+
+  });
+  await Promise.all(contactPromises);
   return {
     success: failures.length === 0,
     message: `Fallback complete. ${successes.length} succeeded, ${failures.length} failed. `,
@@ -169,7 +172,7 @@ async function batchCreateContactsPost({
       message: `Successfully added ${contacts.length} contacts.`,
       hubspotResponse: res.data,
     };
-  } catch (err: any) {
+  } catch (err: unknown) {
     return await fallBackCreateContactPosts({
       contacts,
       accountType,
