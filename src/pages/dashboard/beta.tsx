@@ -26,11 +26,17 @@ const Beta = () => {
     }
   };
   useEffect(() => {
-    setBetaContacts(pullContactsQuery.data?.hubspotResponse.results || []);
+    setBetaContacts(
+      (
+        pullContactsQuery.data?.hubspotResponse as
+          | { results: Contact[] }
+          | undefined
+      )?.results ?? []
+    );
   }, [pullContactsQuery.data]);
 
   useEffect(() => {
-    fetchBetaContacts();
+    void fetchBetaContacts();
   }, []);
   return (
     <>
